@@ -5,13 +5,16 @@ public class Collatz {
 
     /** Correct Implementation of Collatz sequence */
     public static int nextNumber(int n) {
-        if (n%2 == 0){
-        	return n / 2;
+    	int next = n;
+        if (n % 2 == 0){
+        	next = n / 2;
         }
 
-        if (n % 2 == 1){
-        	return 3*n + 1;
+        else if (n % 2 == 1){
+        	next =  3*n + 1;
         }
+
+        return next;
     }
 
     public static void main(String[] args) {
