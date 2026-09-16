@@ -13,11 +13,12 @@ public class DoubleUp {
 
       return newS.toString();
    }
-   
+
    public static void main(String[] args) {
       String s = doubleUp("hello");
       System.out.println(s);
-      
+
       System.out.println(doubleUp("cat"));
    }
 }
+
