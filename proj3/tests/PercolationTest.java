@@ -1,7 +1,7 @@
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PercolationTest {
 
@@ -78,11 +78,114 @@ public class PercolationTest {
         assertThat(p.percolates()).isTrue();
     }
 
-    // TODO: Using the given tests above as a template,
-    //       write some more tests and delete the fail() line
     @Test
-    public void yourFirstTestHere() {
-        fail("Did you write your own tests?");
+    public void percolatesThroughWindingPathTest() {
+        int N = 5;
+        Percolation p = new Percolation(N);
+        // an S-shaped path: down column 0, across row 2, down column 4
+        int[][] openSites = {
+                {0, 0}, {1, 0}, {2, 0},
+                {2, 1}, {2, 2}, {2, 3}, {2, 4},
+                {3, 4}
+        };
+        for (int[] site : openSites) {
+            p.open(site[0], site[1]);
+            assertThat(p.percolates()).isFalse();
+        }
+        // the last site completes the path
+        p.open(4, 4);
+        assertThat(p.percolates()).isTrue();
+        assertThat(p.isFull(4, 4)).isTrue();
+        assertThat(p.numberOfOpenSites()).isEqualTo(9);
+    }
+
+    @Test
+    public void backwashTest() {
+        int N = 3;
+        Percolation p = new Percolation(N);
+        // column 0 percolates; (2, 2) touches the bottom row but has no path to the top
+        int[][] openSites = {
+                {0, 0},
+                {1, 0},
+                {2, 0},
+                {2, 2}
+        };
+        Cell[][] expectedState = {
+                {Cell.FULL, Cell.CLOSED, Cell.CLOSED},
+                {Cell.FULL, Cell.CLOSED, Cell.CLOSED},
+                {Cell.FULL, Cell.CLOSED, Cell.OPEN}
+        };
+        for (int[] site : openSites) {
+            p.open(site[0], site[1]);
+        }
+        assertThat(getState(N, p)).isEqualTo(expectedState);
+        assertThat(p.percolates()).isTrue();
+    }
+
+    @Test
+    public void backwashOpenedBeforePercolatingTest() {
+        int N = 3;
+        Percolation p = new Percolation(N);
+        // same as backwashTest, but (2, 2) is opened first
+        int[][] openSites = {
+                {2, 2},
+                {0, 0},
+                {1, 0},
+                {2, 0}
+        };
+        for (int[] site : openSites) {
+            p.open(site[0], site[1]);
+        }
+        assertThat(p.percolates()).isTrue();
+        assertThat(p.isFull(2, 2)).isFalse();
+    }
+
+    @Test
+    public void openSameSiteTwiceTest() {
+        Percolation p = new Percolation(4);
+        p.open(1, 2);
+        p.open(1, 2);
+        p.open(1, 2);
+        assertThat(p.numberOfOpenSites()).isEqualTo(1);
+    }
+
+    @Test
+    public void notPercolatingWithEmptyRowTest() {
+        int N = 4;
+        Percolation p = new Percolation(N);
+        // open every site except row 2
+        for (int r = 0; r < N; r++) {
+            if (r == 2) {
+                continue;
+            }
+            for (int c = 0; c < N; c++) {
+                p.open(r, c);
+            }
+        }
+        assertThat(p.percolates()).isFalse();
+        assertThat(p.isFull(1, 3)).isTrue();
+        assertThat(p.isFull(3, 0)).isFalse();
+        assertThat(p.numberOfOpenSites()).isEqualTo(12);
+    }
+
+    @Test
+    public void oneByOneClosedTest() {
+        Percolation p = new Percolation(1);
+        assertThat(p.isOpen(0, 0)).isFalse();
+        assertThat(p.isFull(0, 0)).isFalse();
+        assertThat(p.percolates()).isFalse();
+    }
+
+    @Test
+    public void exceptionsTest() {
+        assertThrows(IllegalArgumentException.class, () -> new Percolation(0));
+        assertThrows(IllegalArgumentException.class, () -> new Percolation(-3));
+
+        Percolation p = new Percolation(5);
+        assertThrows(IndexOutOfBoundsException.class, () -> p.open(-1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> p.open(0, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> p.isOpen(5, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> p.isFull(0, -1));
     }
 
 }
