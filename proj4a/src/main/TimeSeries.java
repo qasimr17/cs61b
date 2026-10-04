@@ -1,6 +1,8 @@
 package main;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -30,15 +32,19 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      */
     public TimeSeries(TimeSeries ts, int startYear, int endYear) {
         super();
-        // TODO: Fill in this constructor.
+
+        for (Map.Entry<Integer, Double> entry : ts.entrySet()) {
+            if (entry.getKey() >= startYear && entry.getKey() <= endYear) {
+                put(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     /**
      *  Returns all years for this time series in ascending order.
      */
     public List<Integer> years() {
-        // TODO: Fill in this method.
-        return null;
+        return new ArrayList<>(keySet());
     }
 
     /**
@@ -46,8 +52,7 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      *  order of years().
      */
     public List<Double> data() {
-        // TODO: Fill in this method.
-        return null;
+        return new ArrayList<>(values());
     }
 
     /**
@@ -60,8 +65,27 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      * should store the value from the TimeSeries that contains that year.
      */
     public TimeSeries plus(TimeSeries ts) {
-        // TODO: Fill in this method.
-        return null;
+
+        TimeSeries combined = new TimeSeries();
+
+        // Iterate over current TimeSeries instance
+        for (Integer year : this.keySet()) {
+            if (ts.containsKey(year)) {
+                combined.put(year, (this.get(year) + ts.get(year)));
+            } else {
+                combined.put(year, this.get(year));
+            }
+        }
+
+        // Iterate over the other TimeSeries instance and add remaining <k,v> pairs
+        for (Integer year : ts.keySet()) {
+            if (!this.containsKey(year)) {
+                combined.put(year, ts.get(year));
+            }
+        }
+
+        return combined;
+
     }
 
     /**
@@ -74,10 +98,18 @@ public class TimeSeries extends TreeMap<Integer, Double> {
      * If TS has a year that is not in this TimeSeries, ignore it.
      */
     public TimeSeries dividedBy(TimeSeries ts) {
-        // TODO: Fill in this method.
-        return null;
+
+        TimeSeries quotient = new TimeSeries();
+
+        for (Map.Entry<Integer, Double> entry : this.entrySet()) {
+            Integer year = entry.getKey();
+            if (!ts.containsKey(entry.getKey())) {
+                throw new IllegalArgumentException("Year does not exist in other time series.");
+            }
+            quotient.put(year, (entry.getValue() / ts.get(year)));
+        }
+
+        return quotient;
     }
 
-    // TODO: Add any private helper methods.
-    // TODO: Remove all TODO comments before submitting.
 }
